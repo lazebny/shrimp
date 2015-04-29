@@ -5,26 +5,27 @@ module Shrimp
     attr_accessor :default_options
     attr_writer :phantomjs
 
-    [:format, :margin, :zoom, :orientation, :tmpdir, :rendering_timeout, :rendering_time, :command_config_file, :viewport_width, :viewport_height, :max_redirect_count].each do |m|
-      define_method("#{m}=") do |val|
-        @default_options[m]=val
-      end
+    @default_options = {
+      format:               'A4',
+      margin:               '1cm',
+      zoom:                 1,
+      orientation:          'portrait',
+      tmpdir:               Dir.tmpdir,
+      rendering_timeout:    90000,
+      rendering_time:       1000,
+      command_config_file:  File.expand_path('../config.json', __FILE__),
+      viewport_width:       600,
+      viewport_height:      600,
+      max_redirect_count:   0,
+      layout_factory:       ::Shrimp::LayoutFactory
+    }
+
+    @default_options.each do |key, value|
+      define_method("#{key}=") { |val| @default_options[key] = val }
     end
 
     def initialize
-      @default_options = {
-          :format               => 'A4',
-          :margin               => '1cm',
-          :zoom                 => 1,
-          :orientation          => 'portrait',
-          :tmpdir               => Dir.tmpdir,
-          :rendering_timeout    => 90000,
-          :rendering_time       => 1000,
-          :command_config_file  => File.expand_path('../config.json', __FILE__),
-          :viewport_width       => 600,
-          :viewport_height      => 600,
-          :max_redirect_count   => 0
-      }
+      @default_options = self.class.instance_variable_get(:@default_options)
     end
 
     def phantomjs

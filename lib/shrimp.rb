@@ -1,4 +1,5 @@
 require 'shrimp/version'
+require 'shrimp/layout_factory'
 require 'shrimp/source'
 require 'shrimp/phantom'
 require 'shrimp/middleware'

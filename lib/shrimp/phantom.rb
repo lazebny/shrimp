@@ -33,7 +33,8 @@ module Shrimp
     # Returns the stdout output of phantomjs
     def run
       @error  = nil
-      @result = `#{cmd}`
+      puts cmd
+      puts @result = `#{cmd}`
       unless $?.exitstatus == 0
         @error  = @result
         @result = nil
@@ -43,7 +44,8 @@ module Shrimp
 
     def run!
       @error  = nil
-      @result = `#{cmd}`
+      puts cmd
+      puts @result = `#{cmd}`
       unless $?.exitstatus == 0
         @error  = @result
         @result = nil
@@ -54,29 +56,28 @@ module Shrimp
 
     # Public: Returns the phantom rasterize command
     def cmd
-      cookie_file                       = dump_cookies
-      format, zoom, margin, orientation = options[:format], options[:zoom], options[:margin], options[:orientation]
-      rendering_time, timeout           = options[:rendering_time], options[:rendering_timeout]
-      viewport_width, viewport_height   = options[:viewport_width], options[:viewport_height]
-      max_redirect_count                = options[:max_redirect_count]
-      @outfile                          ||= "#{options[:tmpdir]}/#{Digest::MD5.hexdigest((Time.now.to_i + rand(9001)).to_s)}.pdf"
-      command_config_file               = "--config=#{options[:command_config_file]}"
+      cookie_file         = dump_cookies
+      @outfile          ||= "#{options[:tmpdir]}/#{Digest::MD5.hexdigest((Time.now.to_i + rand(9001)).to_s)}.pdf"
+      command_config_file = "--config=#{options[:command_config_file]}"
+      layout_factory      = options[:layout_factory].create(@source.to_s)
       [
         Shrimp.configuration.phantomjs,
         command_config_file,
         SCRIPT_FILE,
         @source.to_s.shellescape,
         @outfile,
-        format,
-        zoom,
-        margin,
-        orientation,
+        options[:format],
+        options[:zoom],
+        options[:margin],
+        options[:orientation],
         cookie_file,
-        rendering_time,
-        timeout,
-        viewport_width,
-        viewport_height,
-        max_redirect_count
+        options[:rendering_time],
+        options[:rendering_timeout],
+        options[:viewport_width],
+        options[:viewport_height],
+        options[:max_redirect_count],
+        "'#{layout_factory.header}'",
+        "'#{layout_factory.footer}'"
       ].join(" ")
     end
 
@@ -106,7 +107,7 @@ module Shrimp
     # Returns the path to the pdf file
     def to_pdf(path=nil)
       @outfile = File.expand_path(path) if path
-      self.run
+      run
       @outfile
     end
 
@@ -115,7 +116,7 @@ module Shrimp
     #
     # Returns a File Handle of the Resulting pdf
     def to_file(path=nil)
-      self.to_pdf(path)
+      to_pdf(path)
       File.new(@outfile)
     end
 
@@ -124,22 +125,22 @@ module Shrimp
     #
     # Returns the binary string of the pdf
     def to_string(path=nil)
-      File.open(self.to_pdf(path)).read
+      File.open(to_pdf(path)).read
     end
 
     def to_pdf!(path=nil)
       @outfile = File.expand_path(path) if path
-      self.run!
+      run!
       @outfile
     end
 
     def to_file!(path=nil)
-      self.to_pdf!(path)
+      to_pdf!(path)
       File.new(@outfile)
     end
 
     def to_string!(path=nil)
-      File.open(self.to_pdf!(path)).read
+      File.open(to_pdf!(path)).read
     end
 
     private
