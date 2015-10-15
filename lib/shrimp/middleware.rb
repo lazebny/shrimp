@@ -12,6 +12,7 @@ module Shrimp
 
     def call(env)
       @request = Rack::Request.new(env)
+
       if render_as_pdf? #&& headers['Content-Type'] =~ /text\/html|application\/xhtml\+xml/
       #   if already_rendered? && (up_to_date?(@options[:cache_ttl]) || @options[:cache_ttl] == 0)
       #     if File.size(render_to) == 0
@@ -45,6 +46,9 @@ module Shrimp
       #       reload_response(@options[:polling_offset])
       #     end
       #   end
+        rendering_time = @request.params['rendering_time']
+        @options[:rendering_time] = rendering_time if rendering_time
+
         fire_phantom
         body = File.read(render_to)
         headers = {
